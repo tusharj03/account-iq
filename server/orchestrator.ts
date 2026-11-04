@@ -136,6 +136,17 @@ BALANCED MULTI-PRODUCT RECOMMENDATIONS (DO NOT DEFAULT TO FLASHSYSTEM):
   * IBM Storage Ceph: Position strictly for standalone bulk S3 object repositories and raw telemetry archives on commodity hardware (do NOT position Ceph for OpenShift/container apps where Fusion is the strategic path).
 - Ensure your recommendations across the dossier actively utilize this diverse portfolio rather than over-indexing on FlashSystem alone.
 
+PRODUCT-NAMING PRECISION (the model's training data is stale — these are the CURRENT names):
+- The mainframe tier-1 flagship is "IBM Storage DS8A00 (DS8000 G10)". NEVER write "DS8900F", "DS8950F", or "DS8880" — those are superseded generations. Always say DS8A00.
+- The primary block family is "FlashSystem 5600 / 7600 / 9600" with "FCM5". NEVER write "FlashSystem 9500", "9200", "7300", "5300", or "FCM4" — those are the prior generation. Always use the 5600/7600/9600 + FCM5 names.
+- For OpenShift / Kubernetes / container / cloud-native application data, lead with "IBM Storage Fusion". Position "IBM Storage Ceph" ONLY for standalone raw bulk S3 object repositories and uncurated telemetry archives — NEVER for container apps, stateful microservices, or edge app platforms (that is Fusion's job).
+- If you are about to name any product, verify it exists in the CURRENT portfolio list below. Do not invent model numbers or carry over an older name from memory.
+
+SELF-AUDIT BEFORE YOU RETURN (do this silently, then fix violations):
+1. Count your product recommendations. If more than TWO come from the FlashSystem family, replace the weakest FlashSystem pick with the correct product for that workload (DS8A00/TS7700 for mainframe, Fusion for containers, Scale for AI/GPU, Defender for cyber-recovery, Ceph for bulk object, Tape for archive).
+2. Re-read every targetWorkload. If any workload would not realistically run at a company in THIS exact industry, delete or rewrite it. (A utility does not run hospital PACS; an MSP does not run algorithmic trading; a SaaS firm does not run DFSMShsm batch unless it demonstrably hosts mainframes.)
+3. Confirm you span at least THREE distinct IBM product families across the dossier.
+
 ${sourcingRules}
 
 OUTPUT FORMAT:
@@ -162,6 +173,40 @@ interface PipelineContext {
   companyName: string;
   mode: ResearchMode;
   searchResults: Record<string, SearchResult[]>;
+}
+
+/**
+ * Compact digest of what Agents 1 & 2 actually discovered, injected into Agents 3 & 4
+ * so product matching / architectures are grounded in THIS company's real industry,
+ * tech stack, incumbents, and challenges — instead of being guessed from the name alone.
+ */
+function groundingDigest(companyName: string, a1: any, a2: any): string {
+  const tech = a2?.technologyLandscape || {};
+  const ch = a2?.businessChallenges || {};
+  const titles = (arr: any[], n = 3) =>
+    (arr || [])
+      .slice(0, n)
+      .map((f: any) => (typeof f === 'object' ? f.title : null))
+      .filter(Boolean)
+      .join('; ') || 'n/a';
+  const vendors =
+    (tech.existingVendors || [])
+      .slice(0, 4)
+      .map((v: any) => `${v.vendor} (${v.category || '?'}; ${v.estimatedStage || '?'})`)
+      .join('; ') || 'n/a';
+
+  return `GROUNDED RESEARCH ON ${companyName} — these are the verified/analyzed facts from the earlier research agents. Every product match, workload, and architecture you produce MUST be consistent with them. Do NOT introduce a different industry or an implausible workload.
+- Industry (specific sub-industry): ${a1?.profile?.industry || 'unknown'}
+- Strategy: ${a1?.companyStrategy?.summary || 'n/a'}
+- Tech landscape: ${tech.summary || 'n/a'}
+- Likely incumbent storage/infra vendors: ${vendors}
+- Storage / compute / DB footprint: ${titles(tech.storageComputeDb)}
+- Cloud footprint: ${titles(tech.cloudFootprint)}
+- Technology gaps: ${titles(tech.technologyGaps)}
+- Data growth & cost pressures: ${titles(ch.dataGrowthCosts, 2)}
+- Cyber / regulatory exposure: ${titles(ch.cybersecurityRegulatory, 2)}
+- Resilience / DR needs: ${titles(ch.resilienceDisasterRecovery, 2)}
+- AI / workload demands: ${titles(ch.aiWorkloadDemands, 2)}`;
 }
 
 function searchBlock(ctx: PipelineContext, keys: string[]): string {
@@ -322,7 +367,7 @@ Keep each "detail" to 2 sentences. ${FINDING_SCHEMA}`,
   };
 
   // Agent 3: Buying Signals & IBM Opportunity Mapping
-  const runAgent3 = async () => {
+  const runAgent3 = async (digest: string) => {
     const [buyingSignals, ibmMapping] = await Promise.all([
       safe(
         'buyingSignals',
@@ -334,7 +379,9 @@ Keep each "detail" to 2 sentences. ${FINDING_SCHEMA}`,
   "summary": string,
   "signals": SignalFinding[] (4-6)
 }
-SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal"|"M&A / investment"|"Data center / capex"|"Regulatory pressure"|"AI initiative", "headline": string, "detail": string (2 sentences), "urgency": "Act now (0-30 days)"|"Near-term (this quarter)"|"Strategic (6-12 months)", "salesAction": string, "confidence": "High"|"Medium"|"Low", "source": {"label":string,"verified":boolean,"url"?:string,"date"?:string} }${searchBlock(ctx, ['signals'])}`,
+SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal"|"M&A / investment"|"Data center / capex"|"Regulatory pressure"|"AI initiative", "headline": string, "detail": string (2 sentences), "urgency": "Act now (0-30 days)"|"Near-term (this quarter)"|"Strategic (6-12 months)", "salesAction": string, "confidence": "High"|"Medium"|"Low", "source": {"label":string,"verified":boolean,"url"?:string,"date"?:string} }
+
+${digest}${searchBlock(ctx, ['signals'])}`,
             { timeoutMs: 90000 }
           ),
         { summary: '', signals: [] }
@@ -344,7 +391,11 @@ SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal
         () =>
           callRorkJson<any>(
             sys,
-            `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (IBM Storage DS8A00, IBM TS7700, IBM Storage Fusion, IBM Storage Defender, IBM Storage Scale, FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, IBM Storage Ceph, Tape). Return JSON:
+            `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (IBM Storage DS8A00, IBM TS7700, IBM Storage Fusion, IBM Storage Defender, IBM Storage Scale, FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, IBM Storage Ceph, Tape).
+
+${digest}
+
+Return JSON:
 {
   "summary": string,
   "productOpportunities": ProductMatch[] (3-5),
@@ -380,14 +431,18 @@ STRICT REQUIREMENTS FOR PRODUCT MATCHING:
   };
 
   // Agent 4: Discovery, Architectures & Stakeholders
-  const runAgent4 = async () => {
+  const runAgent4 = async (digest: string) => {
     const [meetingCore, meetingExtra, stakeholders] = await Promise.all([
       safe(
         'discovery+objections',
         () =>
           callRorkJson<any>(
             sys,
-            `For "${companyName}", produce discovery questions and objection handling for an IBM Storage SE. Return JSON:
+            `For "${companyName}", produce discovery questions and objection handling for an IBM Storage SE.
+
+${digest}
+
+Return JSON:
 {
   "summary": string,
   "discoveryQuestions": DiscoveryQuestion[] (exactly 5),
@@ -404,7 +459,11 @@ ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": s
         () =>
           callRorkJson<any>(
             sys,
-            `For "${companyName}", produce solution architectures and proof points mapped to IBM Storage. Return JSON:
+            `For "${companyName}", produce solution architectures and proof points mapped to IBM Storage.
+
+${digest}
+
+Return JSON:
 {
   "solutionArchitectures": SolutionArchitecture[] (3),
   "caseStudies": CaseStudy[] (2)
@@ -465,12 +524,15 @@ Name real individuals when the sources below support it. Exactly one persona mus
     };
   };
 
-  const [a1, a2, a3, a4] = await Promise.all([
-    runAgent1(),
-    runAgent2(),
-    runAgent3(),
-    runAgent4(),
-  ]);
+  // Wave 1 — grounding research (profile, strategy, tech landscape, challenges) in parallel.
+  const [a1, a2] = await Promise.all([runAgent1(), runAgent2()]);
+
+  // Build a digest of what we actually learned, so the downstream agents match products
+  // and architectures to THIS company's real industry and stack rather than guessing.
+  const digest = groundingDigest(companyName, a1, a2);
+
+  // Wave 2 — opportunity mapping, discovery, architectures & stakeholders, now grounded.
+  const [a3, a4] = await Promise.all([runAgent3(digest), runAgent4(digest)]);
 
   // Agent 5 — Executive Briefing + scoring
   onProgress?.(step(5, 'Agent 5 · Executive Briefing', 'in_progress', 'Synthesizing the full executive briefing and scoring the opportunity...'));
@@ -478,9 +540,11 @@ Name real individuals when the sources below support it. Exactly one persona mus
     profile: a1.profile,
     strategy: a1.companyStrategy?.summary,
     tech: a2.technologyLandscape?.summary,
+    incumbentVendors: (a2.technologyLandscape?.existingVendors || []).map((v: any) => `${v.vendor} (${v.category}; ${v.estimatedStage})`),
     challenges: a2.businessChallenges?.summary,
     signals: (a3.buyingSignals?.signals || []).map((s: any) => s.headline),
     ibm: (a3.ibmOpportunityMapping?.productOpportunities || []).map((p: any) => `${p.productName} -> ${p.matchedNeed}`),
+    competitorTactics: (a3.ibmOpportunityMapping?.competitorTactics || []).map((c: any) => `${c.competitor}: ${c.ibmCounter}`),
   });
   const a5 = await safe(
     'executiveBriefing',
