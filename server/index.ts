@@ -4,5 +4,5 @@ import { isWebSearchEnabled } from './researchProvider';
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-  console.log(`[AccountIQ] API on http://localhost:${PORT} — mode: ${isWebSearchEnabled() ? 'web-verified' : 'ai-analysis'}`);
+  console.log(`[AccountIQ Backend] Server running on http://localhost:${PORT}`);
 });
