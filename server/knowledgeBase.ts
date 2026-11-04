@@ -52,6 +52,48 @@ export const IBM_STORAGE_PORTFOLIO: Record<string, IbmProduct> = {
     targetWorkloads: ['Backup & recovery targets', 'Capacity / secondary tier', 'Content repositories', 'Flash-based archive'],
     displacementTargets: ['Dell PowerStore (capacity)', 'Pure FlashArray //C & //E', 'Bulk disk-based NAS'],
   },
+  ds8000: {
+    key: 'ds8000',
+    name: 'IBM DS8900F (DS8910F / DS8950F / DS8980F)',
+    tagline: 'Mission-critical enterprise tier-1 storage co-engineered for IBM zSystems and LinuxONE',
+    positioning:
+      'The definitive tier-1 storage platform for IBM Z mainframes and hybrid enterprise estates. Co-engineered with IBM z16 and z/OS to deliver 99.99999% (seven-9s) availability, sub-20µs latency via zHyperLink, Safeguarded Copy with IBM Z Cyber Vault integration, automated multi-target GDPS disaster recovery, and Transparent Cloud Tiering (TCT) that offloads DFSMShsm CPU overhead.',
+    keyCapabilities: [
+      'zHyperLink: Direct PCIe attachment to IBM zSystems processors providing <20-microsecond read response times for DB2 and IMS transactional workloads',
+      'Safeguarded Copy & IBM Z Cyber Vault: Automated, immutable, logically air-gapped recovery copies with continuous forensic integrity analysis for z/OS',
+      'Seven 9s (99.99999%) guaranteed data availability with zero-data-loss multi-target GDPS (Metro Mirror + Global Mirror)',
+      'Transparent Cloud Tiering (TCT): Directly migrates cold mainframe datasets from storage controller to cloud/object storage without burning host mainframe MIPS',
+      'Unified FICON, zHyperLink, and Fibre Channel connectivity supporting both mainframe z/OS and distributed open systems workloads',
+      'Pervasive encryption and line-rate hardware cryptographic offload for regulatory compliance',
+    ],
+    targetWorkloads: [
+      'IBM zSystems / z/OS mainframe core workloads',
+      'Mainframe Managed Service Providers (MSPs) & hosting (Ensono, Kyndryl, DXC)',
+      'High-throughput DB2 for z/OS, CICS, and IMS transaction processing',
+      'Mission-critical financial, insurance, health, and government core systems',
+    ],
+    displacementTargets: ['Dell PowerMax 2500 / 8500 (FICON attached)', 'Hitachi VSP 5000 (Mainframe attached)'],
+  },
+  ts7700: {
+    key: 'ts7700',
+    name: 'IBM TS7700 (TS7770 / TS7760)',
+    tagline: 'High-performance virtual tape server and grid for IBM Z mainframes',
+    positioning:
+      'The industry-standard mainframe virtual tape architecture. Replaces physical tape handling with high-speed all-flash/disk cache, automated multi-node active-active grid clustering across up to 8 sites, transparent object storage tiering, and native z/OS DFSMS integration.',
+    keyCapabilities: [
+      'Active-Active Grid Architecture: Up to 8 multi-site grid nodes providing continuous automated disaster recovery with zero host intervention',
+      'Safeguarded Copy for Virtual Tape: Protects mainframe batch datasets, catalog backups, and logs from ransomware tampering',
+      'Cloud & Object Storage Tiering: Transparently offloads cold mainframe tape data to IBM Storage Ceph, IBM Cloud, or AWS S3 without mainframe CPU tax',
+      'Dramatically shrinks mainframe batch processing and backup windows for high-MIPS environments',
+    ],
+    targetWorkloads: [
+      'Mainframe batch processing & backup',
+      'z/OS DFSMShsm and DFSMSdss automated dataset migration',
+      'Multi-tenant mainframe MSP hosting and service delivery (e.g. Ensono)',
+      'Long-term mainframe regulatory archiving',
+    ],
+    displacementTargets: ['Dell DLm (Disk Library for mainframe)', 'Luminex Channel Gateway', 'Oracle StorageTek VSM'],
+  },
   storageScale: {
     key: 'storageScale',
     name: 'IBM Storage Scale (formerly GPFS)',
@@ -142,21 +184,23 @@ export interface CompetitorBattlecard {
 export const COMPETITOR_BATTLECARDS: Record<string, CompetitorBattlecard> = {
   dell: {
     vendor: 'Dell Technologies',
-    flagshipProducts: ['PowerMax 2500 / 8500', 'PowerStore', 'PowerScale (Isilon)', 'PowerProtect / Cyber Recovery', 'ECS / ObjectScale'],
+    flagshipProducts: ['PowerMax 2500 / 8500 (Open Systems & Mainframe FICON)', 'PowerStore', 'PowerScale (Isilon)', 'PowerProtect / Cyber Recovery', 'ECS / ObjectScale', 'DLm (Disk Library for mainframe)'],
     vulnerabilities: [
       'Post-warranty maintenance cliff: support/maintenance pricing tends to rise sharply in years 4–5, nudging customers toward expensive forklift refreshes.',
       'Fragmented OS estate: PowerMax, PowerStore, PowerScale, and ECS each run completely different operating systems — no single unified control plane.',
+      'Mainframe / FICON attachments: PowerMax lacks native co-engineering with IBM z16 — no zHyperLink (<20µs latency), no IBM Z Cyber Vault integration, and cannot offload DFSMShsm dataset migration via Transparent Cloud Tiering (TCT), consuming expensive host mainframe MIPS.',
       'Ransomware detection is largely post-process software (CloudIQ) rather than inline drive hardware, and recovery orchestration is fragmented.',
       'PowerScale can bottleneck on single-stream throughput for large GPU clusters vs parallel file systems.',
       'ECS appliance lock-in limits open S3 scaling across commodity servers.',
     ],
     trapsToSet: [
       'Ask: "When Dell quoted your refresh, were years 4, 5, and 6 of maintenance locked in writing — or are you exposed to post-warranty escalation?"',
+      'Ask: "For mainframe workloads on PowerMax, how many host MIPS are burned during daily backup and migration compared to IBM DS8900F Transparent Cloud Tiering?"',
       'Ask: "For cyber recovery, how long does clean-room validation take across multi-tier workloads before restoring to production?"',
-      'Ask: "How many disparate management consoles do you log into to manage Dell block, file, object, and backup silos?"',
+      'Ask: "How many disparate management consoles do you log into to manage Dell block, file, object, backup, and mainframe silos?"',
     ],
     ibmCounterPosition:
-      'IBM offers a cohesive multi-product portfolio: IBM Storage Defender for automated clean-room cyber resilience across the entire estate; IBM Storage Ceph for open, software-defined S3 telemetry and object lakes (displacing ECS); IBM Storage Scale for GPU/AI parallel streaming (displacing PowerScale); and IBM FlashSystem 9600 with FCM5 for mission-critical block with inline hardware ransomware detection.',
+      'IBM offers a cohesive multi-product portfolio: IBM DS8900F and TS7700 for IBM zSystems mainframe tier-1 storage and virtual tape (displacing PowerMax and DLm with sub-20µs zHyperLink and seven-9s reliability); IBM Storage Defender for automated clean-room cyber resilience across the entire estate; IBM Storage Ceph for open, software-defined S3 telemetry and object lakes (displacing ECS); IBM Storage Scale for GPU/AI parallel streaming (displacing PowerScale); and IBM FlashSystem 9600 with FCM5 for mission-critical distributed block.',
   },
   pure: {
     vendor: 'Pure Storage',

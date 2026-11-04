@@ -117,6 +117,7 @@ BE SPECIFIC, NOT GENERIC (this is the difference between a useful dossier and Ch
 INDUSTRY-AUTHENTIC WORKLOAD FIDELITY (CRITICAL):
 - Ground all findings and storage workloads strictly in the target company's ACTUAL industry:
   * Electric / Gas / Water Utilities: SCADA/EMS systems, AMI/smart meter telemetry ingestion, GIS geospatial networks, grid sensor time-series data, NERC CIP compliance, substation edge data, operational DR and clean-room isolation. NEVER suggest medical imaging, hospital PACS, retail POS, or algorithmic trading for a utility!
+  * Managed Service Providers (MSPs) & Hosting Providers (e.g. Ensono, Kyndryl, DXC): Identify whether they manage or host **Mainframe (IBM Z / zSystems / z/OS / LinuxONE / MIPS)** environments. Ensono in particular is a premier Mainframe MSP managing massive MIPS fleets alongside hybrid cloud. For mainframe-centric MSPs like Ensono, anchor storage plays in **IBM DS8900F** (tier-1 zSystems flash with zHyperLink) and **IBM TS7700** (mainframe virtual tape grid) alongside Defender and Ceph. Do NOT mischaracterize them as an open-cloud-only company!
   * Healthcare / Life Sciences: PACS / VNA medical imaging, Epic / Cerner EHR, HIPAA/HITECH compliance, genomic sequencing, clinical AI inference.
   * Financial Services: Core banking OLTP, payment settlement, fraud detection, algorithmic trading, SEC 17a-4 compliance, DORA compliance.
   * Manufacturing / Logistics: MES, IoT sensor telematics, supply chain ERP, warehouse automation, computer vision QA.
@@ -125,6 +126,8 @@ INDUSTRY-AUTHENTIC WORKLOAD FIDELITY (CRITICAL):
 
 BALANCED MULTI-PRODUCT RECOMMENDATIONS (DO NOT DEFAULT TO FLASHSYSTEM):
 - IBM Storage is a rich, multi-tiered portfolio. DO NOT recommend FlashSystem for every opportunity! You must match the right tool to the right problem:
+  * IBM DS8900F (DS8910F/DS8950F/DS8980F): Definitive tier-1 storage platform co-engineered for IBM zSystems / LinuxONE with sub-20µs zHyperLink latency, seven-9s availability, IBM Z Cyber Vault integration, and Transparent Cloud Tiering (TCT). Highlight for any enterprise or MSP running or hosting mainframes (e.g. Ensono, Kyndryl, DXC, core banking, insurance).
+  * IBM TS7700: High-performance virtual tape server and active-active grid for IBM Z mainframe backup, batch processing, and DFSMShsm dataset migration.
   * IBM Storage Defender: Highlight for enterprise cyber resilience, ransomware detection, clean-room recovery orchestration, and regulatory compliance (NERC CIP for utilities, DORA for finance, SEC for public companies).
   * IBM Storage Ceph: Highlight for large-scale telemetry data lakes, smart meter logs, S3 object repositories, and multi-petabyte unstructured storage.
   * IBM Storage Fusion: Highlight for containerized applications, Red Hat OpenShift data services, and Kubernetes persistent storage & disaster recovery.
@@ -195,7 +198,7 @@ export async function runResearchPipeline(
       firmographics: `${companyName} headquarters annual revenue number of employees company profile`,
       people: `${companyName} CIO CTO "chief information officer" "chief technology officer" head of infrastructure VP infrastructure 2026`,
       strategy: `${companyName} strategy earnings technology investments 2026`,
-      tech: `${companyName} cloud infrastructure data center storage vendors`,
+      tech: `${companyName} infrastructure data center storage mainframe IBM Z zSystems cloud vendors`,
       signals: `${companyName} CIO CTO appointment data center AI investment 2026`,
     };
     await Promise.all(
@@ -341,7 +344,7 @@ SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal
         () =>
           callRorkJson<any>(
             sys,
-            `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, Storage Scale, Defender, Ceph, Fusion, Tape). Return JSON:
+            `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (IBM DS8900F, IBM TS7700, FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, Storage Scale, Defender, Ceph, Fusion, Tape). Return JSON:
 {
   "summary": string,
   "productOpportunities": ProductMatch[] (3-5),
@@ -354,9 +357,10 @@ BusinessCaseMetric = { "metric": string, "currentState": string, "withIbm": stri
 CompetitorTactic = { "competitor": string, "likelyInstalled": string, "painPoint": string, "trapQuestion": string, "ibmCounter": string }
 
 STRICT REQUIREMENTS FOR PRODUCT MATCHING:
-1. Workload authenticity: Every targetWorkload MUST belong to THIS company's actual industry operations (e.g. for a utility: smart meter data, SCADA telemetry, outage management, grid analytics, NERC CIP compliance; NEVER suggest hospital PACS, medical imaging, or financial trading for a utility).
+1. Workload authenticity: Every targetWorkload MUST belong to THIS company's actual industry operations (e.g. for an MSP like Ensono: mainframe hosting/MIPS management, hybrid cloud DR, backup as a service; for a utility: smart meter data, SCADA telemetry, outage management, NERC CIP compliance; NEVER suggest hospital PACS or medical imaging for an MSP or utility!).
 2. Diverse portfolio balance: DO NOT default to FlashSystem for every opportunity! You MUST span at least 3 distinct IBM Storage product families. For example:
-   - IBM Storage Defender for automated cyber recovery & compliance
+   - IBM DS8900F & IBM TS7700 for IBM Z mainframe estates, z/OS transactional cores, and Mainframe MSPs (like Ensono, Kyndryl)
+   - IBM Storage Defender for automated cyber recovery & compliance (including IBM Z Cyber Vault)
    - IBM Storage Ceph for massive unstructured data / telemetry / S3 object lakes
    - IBM Storage Fusion for containerized Red Hat OpenShift data services & microservices
    - IBM Storage Scale for high-throughput AI GPU clusters & parallel files
@@ -491,7 +495,7 @@ Name real individuals when the sources below support it. Exactly one persona mus
 }
 The executiveBriefingDoc MUST be a thorough, well-structured MARKDOWN document (this is the ONE field where markdown is required). Aim for 450-650 words with crisp, punchy SE prose and bullet points under each ## heading:
 ## Executive Summary (the one-paragraph "why this account, why now")
-## Where IBM Storage Fits (3-5 specific plays mapped to their situation across Defender, Ceph, Fusion, Scale, and FlashSystem)
+## Where IBM Storage Fits (3-5 specific plays mapped to their situation across DS8900F, TS7700, Defender, Ceph, Fusion, Scale, and FlashSystem)
 ## The Numbers That Matter (business-case framing)
 ## Competitive Landscape (who is likely incumbent and how to displace)
 ## Recommended Meeting Plan (how to run the first exec conversation)
