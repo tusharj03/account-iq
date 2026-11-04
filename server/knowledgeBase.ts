@@ -54,11 +54,12 @@ export const IBM_STORAGE_PORTFOLIO: Record<string, IbmProduct> = {
   },
   ds8000: {
     key: 'ds8000',
-    name: 'IBM DS8900F (DS8910F / DS8950F / DS8980F)',
-    tagline: 'Mission-critical enterprise tier-1 storage co-engineered for IBM zSystems and LinuxONE',
+    name: 'IBM Storage DS8A00 (DS8000 G10)',
+    tagline: 'Enterprise tier-1 storage co-engineered for IBM zSystems and LinuxONE',
     positioning:
-      'The definitive tier-1 storage platform for IBM Z mainframes and hybrid enterprise estates. Co-engineered with IBM z16 and z/OS to deliver 99.99999% (seven-9s) availability, sub-20µs latency via zHyperLink, Safeguarded Copy with IBM Z Cyber Vault integration, automated multi-target GDPS disaster recovery, and Transparent Cloud Tiering (TCT) that offloads DFSMShsm CPU overhead.',
+      'The current Generation 10 flagship tier-1 storage platform for IBM Z mainframes and mission-critical enterprise estates. Powered by POWER9+ active-active processor nodes and HPFE Gen3 NVMe flash, delivering 99.99999% availability, sub-20µs latency via zHyperLink, Safeguarded Copy with IBM Z Cyber Vault integration, automated multi-target GDPS disaster recovery, and Transparent Cloud Tiering (TCT) that offloads DFSMShsm CPU overhead from host mainframes.',
     keyCapabilities: [
+      'POWER9+ active-active server pairs with High-Performance Flash Enclosure (HPFE Gen3) NVMe architecture for peak IOPS and ultra-low latency',
       'zHyperLink: Direct PCIe attachment to IBM zSystems processors providing <20-microsecond read response times for DB2 and IMS transactional workloads',
       'Safeguarded Copy & IBM Z Cyber Vault: Automated, immutable, logically air-gapped recovery copies with continuous forensic integrity analysis for z/OS',
       'Seven 9s (99.99999%) guaranteed data availability with zero-data-loss multi-target GDPS (Metro Mirror + Global Mirror)',
@@ -126,35 +127,42 @@ export const IBM_STORAGE_PORTFOLIO: Record<string, IbmProduct> = {
     targetWorkloads: ['Enterprise DR / BCP', 'Mission-critical database recovery', 'Regulatory compliance', 'Ransomware response'],
     displacementTargets: ['Commvault', 'Cohesity', 'Rubrik', 'Dell PowerProtect / Cyber Recovery'],
   },
+  storageFusion: {
+    key: 'storageFusion',
+    name: 'IBM Storage Fusion (HCI & Software)',
+    tagline: 'Turnkey container data platform, backup, and DR for Red Hat OpenShift & hybrid cloud',
+    positioning:
+      'IBM\'s primary strategic platform for modern application data services, Red Hat OpenShift, stateful Kubernetes microservices, and hybrid cloud app modernization. Available as turnkey integrated HCI or software-defined on bare metal/cloud. Delivers persistent container storage, app-consistent backup and restore (manifests + volumes), multi-cluster automated disaster recovery (Metro-DR / Regional-DR), and seamless hybrid cloud mobility.',
+    keyCapabilities: [
+      'Turnkey container-native data platform directly integrated into Red Hat OpenShift control plane',
+      'Application-consistent backup and rapid restore (protects both stateful persistent volumes and complete Kubernetes metadata/manifests)',
+      'Automated zero-RPO Metro-DR and asynchronous Regional-DR across multi-cluster OpenShift estates',
+      'Direct data services and acceleration for watsonx and enterprise AI pipelines on OpenShift',
+      'Global data access bridging OpenShift clusters to IBM Storage Scale and cloud data sources',
+      'The definitive enterprise alternative to Portworx, NetApp Astra, and complex DIY container storage stacks',
+    ],
+    targetWorkloads: [
+      'Red Hat OpenShift application modernization & stateful microservices',
+      'Enterprise container backup, disaster recovery, and mobility',
+      'watsonx & AI pipelines running on OpenShift',
+      'MSP multi-tenant cloud-native hosting and service delivery',
+    ],
+    displacementTargets: ['Portworx by Pure Storage', 'NetApp Astra / Trident', 'Dell Container Storage Modules (CSM)', 'DIY Rook/Ceph on Kubernetes'],
+  },
   storageCeph: {
     key: 'storageCeph',
     name: 'IBM Storage Ceph',
-    tagline: 'Software-defined unified block, file, and object at scale',
+    tagline: 'Software-defined unified block, file, and object for exabyte-scale bulk data',
     positioning:
-      'Open, software-defined storage for cloud-native platforms and large data lakes — S3-compatible object, block, and file from one cluster, scaling to exabytes.',
+      'Open, software-defined storage for standalone, exabyte-scale S3 object repositories, telemetry lakes, and bulk archival tiers on commodity x86 servers. (Note: For Red Hat OpenShift, stateful microservices, and container application modernization, IBM strategically leads with IBM Storage Fusion).',
     keyCapabilities: [
-      'Scale-out from petabytes to exabytes on commodity hardware',
-      'S3-compatible object with multi-site replication',
-      'Open-source foundation with enterprise-hardened IBM support',
-      'Cost-effective tier for AI/RAG corpora, vector data, and data lakes',
+      'Scale-out from petabytes to exabytes on commodity hardware without proprietary appliance markups',
+      'S3-compatible object storage with multi-site asynchronous replication',
+      'Open-source foundation with enterprise-hardened IBM support and lifecycle management',
+      'Cost-effective bulk tier for raw telemetry, IoT logs, video archives, and long-term uncurated data lakes',
     ],
-    targetWorkloads: ['Data lakes & object repositories', 'Cloud-native / Kubernetes persistent volumes', 'RAG & AI data corpora', 'Archival repositories'],
+    targetWorkloads: ['Raw telemetry & IoT log archives', 'Secondary S3 object repositories', 'Multi-petabyte uncurated data lakes', 'Commodity hardware bulk storage'],
     displacementTargets: ['Dell ECS / ObjectScale', 'Scality', 'MinIO', 'Pure FlashBlade //E'],
-  },
-  storageFusion: {
-    key: 'storageFusion',
-    name: 'IBM Storage Fusion',
-    tagline: 'Container-native data services for Red Hat OpenShift',
-    positioning:
-      'Turnkey data platform for OpenShift — software or HCI appliance — delivering persistent storage, backup, and data protection for stateful Kubernetes apps and AI/watsonx on OpenShift.',
-    keyCapabilities: [
-      'Software-only or integrated HCI deployment on bare metal / cloud',
-      'Container-granular backup & restore (both app manifests and stateful volumes)',
-      'Data services for watsonx and AI pipelines running on OpenShift',
-      'Global data access that connects OpenShift to Storage Scale data',
-    ],
-    targetWorkloads: ['Stateful Kubernetes apps', 'OpenShift modernization', 'watsonx / AI on OpenShift', 'Hybrid-cloud container pipelines'],
-    displacementTargets: ['Portworx by Pure Storage', 'NetApp Astra / Trident', 'Dell Container Storage Modules'],
   },
   tapeAndArchive: {
     key: 'tapeAndArchive',
@@ -195,12 +203,12 @@ export const COMPETITOR_BATTLECARDS: Record<string, CompetitorBattlecard> = {
     ],
     trapsToSet: [
       'Ask: "When Dell quoted your refresh, were years 4, 5, and 6 of maintenance locked in writing — or are you exposed to post-warranty escalation?"',
-      'Ask: "For mainframe workloads on PowerMax, how many host MIPS are burned during daily backup and migration compared to IBM DS8900F Transparent Cloud Tiering?"',
+      'Ask: "For mainframe workloads on PowerMax, how many host MIPS are burned during daily backup and migration compared to IBM Storage DS8A00 Transparent Cloud Tiering?"',
       'Ask: "For cyber recovery, how long does clean-room validation take across multi-tier workloads before restoring to production?"',
       'Ask: "How many disparate management consoles do you log into to manage Dell block, file, object, backup, and mainframe silos?"',
     ],
     ibmCounterPosition:
-      'IBM offers a cohesive multi-product portfolio: IBM DS8900F and TS7700 for IBM zSystems mainframe tier-1 storage and virtual tape (displacing PowerMax and DLm with sub-20µs zHyperLink and seven-9s reliability); IBM Storage Defender for automated clean-room cyber resilience across the entire estate; IBM Storage Ceph for open, software-defined S3 telemetry and object lakes (displacing ECS); IBM Storage Scale for GPU/AI parallel streaming (displacing PowerScale); and IBM FlashSystem 9600 with FCM5 for mission-critical distributed block.',
+      'IBM offers a cohesive multi-product portfolio: IBM Storage DS8A00 and TS7700 for IBM zSystems mainframe tier-1 storage and virtual tape (displacing PowerMax and DLm with sub-20µs zHyperLink and seven-9s reliability); IBM Storage Defender for automated clean-room cyber resilience across the entire estate; IBM Storage Fusion for turnkey container data services and backup on OpenShift; IBM Storage Scale for GPU/AI parallel streaming (displacing PowerScale); IBM Storage Ceph for open S3 bulk object lakes (displacing ECS); and IBM FlashSystem 9600 with FCM5 for mission-critical distributed block.',
   },
   pure: {
     vendor: 'Pure Storage',
