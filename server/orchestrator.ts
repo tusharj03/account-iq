@@ -417,7 +417,7 @@ STRICT REQUIREMENTS FOR PRODUCT MATCHING:
    - IBM Tape for air-gapped deep compliance archive
    - IBM FlashSystem for core latency-sensitive databases / transactional block storage
    - IBM Storage Ceph strictly for secondary bulk S3 object repositories / uncurated telemetry
-   At most TWO recommendations may be from FlashSystem.`,
+   At most TWO recommendations may be from FlashSystem.${searchBlock(ctx, ['tech', 'strategy'])}`,
             { timeoutMs: 90000 }
           ),
         emptyIbm()
@@ -449,7 +449,7 @@ Return JSON:
   "objectionsAndCounters": ObjectionHandling[] (3)
 }
 DiscoveryQuestion = { "number": number, "question": string, "intent": string, "listenFor": string[], "pivot": string, "targetRole": string }
-ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": string, "response": string, "proofPoint": string }`,
+ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": string, "response": string, "proofPoint": string }${searchBlock(ctx, ['tech'])}`,
             { timeoutMs: 90000 }
           ),
         { summary: '', discoveryQuestions: [], objectionsAndCounters: [] }
@@ -470,7 +470,7 @@ Return JSON:
 }
 SolutionArchitecture = { "id": string, "title": string, "scenario": string, "tiers": [{"name": string, "items": string[]}] (3 tiers), "benefits": string[] }
 CaseStudy = { "customerDescriptor": string, "industry": string, "challenge": string, "solution": string, "results": string[], "verified": boolean }
-All 3 SolutionArchitectures MUST reflect this company's actual industry (e.g. for a utility: Smart Grid Telemetry Lake with Ceph, Substation & OT Clean-Room Resilience with Defender, and Core Grid Analytics with FlashSystem; NEVER generate medical imaging or banking trading architectures for a utility!). For CaseStudy: set verified=true with a real named customer ONLY if you are genuinely confident it is a real public IBM reference; otherwise use an anonymized descriptor (e.g. "A major regional electric utility") and verified=false.`,
+All 3 SolutionArchitectures MUST reflect this company's actual industry (e.g. for a utility: Smart Grid Telemetry Lake with Ceph, Substation & OT Clean-Room Resilience with Defender, and Core Grid Analytics with FlashSystem; NEVER generate medical imaging or banking trading architectures for a utility!). For CaseStudy: set verified=true with a real named customer ONLY if you are genuinely confident it is a real public IBM reference; otherwise use an anonymized descriptor (e.g. "A major regional electric utility") and verified=false.${searchBlock(ctx, ['tech', 'strategy'])}`,
             { timeoutMs: 90000 }
           ),
         { solutionArchitectures: [], caseStudies: [] }
@@ -524,15 +524,20 @@ Name real individuals when the sources below support it. Exactly one persona mus
     };
   };
 
-  // Wave 1 — grounding research (profile, strategy, tech landscape, challenges) in parallel.
-  const [a1, a2] = await Promise.all([runAgent1(), runAgent2()]);
-
-  // Build a digest of what we actually learned, so the downstream agents match products
-  // and architectures to THIS company's real industry and stack rather than guessing.
-  const digest = groundingDigest(companyName, a1, a2);
-
-  // Wave 2 — opportunity mapping, discovery, architectures & stakeholders, now grounded.
-  const [a3, a4] = await Promise.all([runAgent3(digest), runAgent4(digest)]);
+  // Grounding strategy depends on whether we have live web results:
+  // - web-verified: the up-front searches already ran, so Agents 3 & 4 are grounded
+  //   directly on those live results (via searchBlock). We can run ALL agents in a single
+  //   parallel wave — fast, and still anchored to real company facts.
+  // - ai-analysis (no search key): there are no live results, so we fall back to a two-wave
+  //   pipeline where Agents 3 & 4 are grounded on a digest synthesized by Agents 1 & 2.
+  let a1: any, a2: any, a3: any, a4: any;
+  if (mode === 'web-verified') {
+    [a1, a2, a3, a4] = await Promise.all([runAgent1(), runAgent2(), runAgent3(''), runAgent4('')]);
+  } else {
+    [a1, a2] = await Promise.all([runAgent1(), runAgent2()]);
+    const digest = groundingDigest(companyName, a1, a2);
+    [a3, a4] = await Promise.all([runAgent3(digest), runAgent4(digest)]);
+  }
 
   // Agent 5 — Executive Briefing + scoring
   onProgress?.(step(5, 'Agent 5 · Executive Briefing', 'in_progress', 'Synthesizing the full executive briefing and scoring the opportunity...'));

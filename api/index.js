@@ -740,7 +740,7 @@ Keep each "detail" to 2 sentences. ${FINDING_SCHEMA}`,
       businessChallenges: unwrap(challenges, "businessChallenges")
     };
   };
-  const runAgent3 = async (digest2) => {
+  const runAgent3 = async (digest) => {
     const [buyingSignals, ibmMapping] = await Promise.all([
       safe(
         "buyingSignals",
@@ -753,7 +753,7 @@ Keep each "detail" to 2 sentences. ${FINDING_SCHEMA}`,
 }
 SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal"|"M&A / investment"|"Data center / capex"|"Regulatory pressure"|"AI initiative", "headline": string, "detail": string (2 sentences), "urgency": "Act now (0-30 days)"|"Near-term (this quarter)"|"Strategic (6-12 months)", "salesAction": string, "confidence": "High"|"Medium"|"Low", "source": {"label":string,"verified":boolean,"url"?:string,"date"?:string} }
 
-${digest2}${searchBlock(ctx, ["signals"])}`,
+${digest}${searchBlock(ctx, ["signals"])}`,
           { timeoutMs: 9e4 }
         ),
         { summary: "", signals: [] }
@@ -764,7 +764,7 @@ ${digest2}${searchBlock(ctx, ["signals"])}`,
           sys,
           `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (IBM Storage DS8A00, IBM TS7700, IBM Storage Fusion, IBM Storage Defender, IBM Storage Scale, FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, IBM Storage Ceph, Tape).
 
-${digest2}
+${digest}
 
 Return JSON:
 {
@@ -788,7 +788,7 @@ STRICT REQUIREMENTS FOR PRODUCT MATCHING:
    - IBM Tape for air-gapped deep compliance archive
    - IBM FlashSystem for core latency-sensitive databases / transactional block storage
    - IBM Storage Ceph strictly for secondary bulk S3 object repositories / uncurated telemetry
-   At most TWO recommendations may be from FlashSystem.`,
+   At most TWO recommendations may be from FlashSystem.${searchBlock(ctx, ["tech", "strategy"])}`,
           { timeoutMs: 9e4 }
         ),
         emptyIbm()
@@ -800,7 +800,7 @@ STRICT REQUIREMENTS FOR PRODUCT MATCHING:
       ibmOpportunityMapping: unwrap(ibmMapping, "ibmOpportunityMapping")
     };
   };
-  const runAgent4 = async (digest2) => {
+  const runAgent4 = async (digest) => {
     const [meetingCore, meetingExtra, stakeholders] = await Promise.all([
       safe(
         "discovery+objections",
@@ -808,7 +808,7 @@ STRICT REQUIREMENTS FOR PRODUCT MATCHING:
           sys,
           `For "${companyName}", produce discovery questions and objection handling for an IBM Storage SE.
 
-${digest2}
+${digest}
 
 Return JSON:
 {
@@ -817,7 +817,7 @@ Return JSON:
   "objectionsAndCounters": ObjectionHandling[] (3)
 }
 DiscoveryQuestion = { "number": number, "question": string, "intent": string, "listenFor": string[], "pivot": string, "targetRole": string }
-ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": string, "response": string, "proofPoint": string }`,
+ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": string, "response": string, "proofPoint": string }${searchBlock(ctx, ["tech"])}`,
           { timeoutMs: 9e4 }
         ),
         { summary: "", discoveryQuestions: [], objectionsAndCounters: [] }
@@ -828,7 +828,7 @@ ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": s
           sys,
           `For "${companyName}", produce solution architectures and proof points mapped to IBM Storage.
 
-${digest2}
+${digest}
 
 Return JSON:
 {
@@ -837,7 +837,7 @@ Return JSON:
 }
 SolutionArchitecture = { "id": string, "title": string, "scenario": string, "tiers": [{"name": string, "items": string[]}] (3 tiers), "benefits": string[] }
 CaseStudy = { "customerDescriptor": string, "industry": string, "challenge": string, "solution": string, "results": string[], "verified": boolean }
-All 3 SolutionArchitectures MUST reflect this company's actual industry (e.g. for a utility: Smart Grid Telemetry Lake with Ceph, Substation & OT Clean-Room Resilience with Defender, and Core Grid Analytics with FlashSystem; NEVER generate medical imaging or banking trading architectures for a utility!). For CaseStudy: set verified=true with a real named customer ONLY if you are genuinely confident it is a real public IBM reference; otherwise use an anonymized descriptor (e.g. "A major regional electric utility") and verified=false.`,
+All 3 SolutionArchitectures MUST reflect this company's actual industry (e.g. for a utility: Smart Grid Telemetry Lake with Ceph, Substation & OT Clean-Room Resilience with Defender, and Core Grid Analytics with FlashSystem; NEVER generate medical imaging or banking trading architectures for a utility!). For CaseStudy: set verified=true with a real named customer ONLY if you are genuinely confident it is a real public IBM reference; otherwise use an anonymized descriptor (e.g. "A major regional electric utility") and verified=false.${searchBlock(ctx, ["tech", "strategy"])}`,
           { timeoutMs: 9e4 }
         ),
         { solutionArchitectures: [], caseStudies: [] }
@@ -889,9 +889,14 @@ Name real individuals when the sources below support it. Exactly one persona mus
       engagementStrategy
     };
   };
-  const [a1, a2] = await Promise.all([runAgent1(), runAgent2()]);
-  const digest = groundingDigest(companyName, a1, a2);
-  const [a3, a4] = await Promise.all([runAgent3(digest), runAgent4(digest)]);
+  let a1, a2, a3, a4;
+  if (mode === "web-verified") {
+    [a1, a2, a3, a4] = await Promise.all([runAgent1(), runAgent2(), runAgent3(""), runAgent4("")]);
+  } else {
+    [a1, a2] = await Promise.all([runAgent1(), runAgent2()]);
+    const digest = groundingDigest(companyName, a1, a2);
+    [a3, a4] = await Promise.all([runAgent3(digest), runAgent4(digest)]);
+  }
   onProgress?.(step(5, "Agent 5 \xB7 Executive Briefing", "in_progress", "Synthesizing the full executive briefing and scoring the opportunity..."));
   const summaryContext = JSON.stringify({
     profile: a1.profile,
