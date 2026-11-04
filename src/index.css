@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background-color: #f4f4f4;
+  color: #161616;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f4;
+}
+::-webkit-scrollbar-thumb {
+  background: #c6c6c6;
+  border: 2px solid #f4f4f4;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+::selection {
+  background: #0f62fe;
+  color: #fff;
+}
+
+/* Rendered-markdown ("prose") styling for briefings + copilot answers */
+.md {
+  color: #262626;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+.md > *:first-child {
+  margin-top: 0;
+}
+.md h1,
+.md h2,
+.md h3 {
+  color: #161616;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.md h1 {
+  font-size: 1.5rem;
+  margin: 1.6rem 0 0.8rem;
+}
+.md h2 {
+  font-size: 1.15rem;
+  margin: 1.6rem 0 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+.md h3 {
+  font-size: 1rem;
+  margin: 1.2rem 0 0.4rem;
+}
+.md p {
+  margin: 0.6rem 0;
+}
+.md ul,
+.md ol {
+  margin: 0.6rem 0;
+  padding-left: 1.3rem;
+}
+.md ul {
+  list-style: disc;
+}
+.md ol {
+  list-style: decimal;
+}
+.md li {
+  margin: 0.3rem 0;
+}
+.md strong {
+  font-weight: 600;
+  color: #161616;
+}
+.md a {
+  color: #0f62fe;
+  text-decoration: underline;
+}
+.md code {
+  font-family: 'IBM Plex Mono', monospace;
+  background: #f4f4f4;
+  border: 1px solid #e0e0e0;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.85em;
+}
+.md blockquote {
+  border-left: 3px solid #0f62fe;
+  margin: 0.8rem 0;
+  padding: 0.2rem 0 0.2rem 1rem;
+  color: #525252;
+}
+.md table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.8rem 0;
+  font-size: 0.85rem;
+}
+.md th,
+.md td {
+  border: 1px solid #e0e0e0;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+.md th {
+  background: #f4f4f4;
+  font-weight: 600;
+}
+
+/* compact variant for chat bubbles */
+.md-compact {
+  font-size: 0.875rem;
+}
+.md-compact h2 {
+  font-size: 1rem;
+  border: none;
+  margin: 0.8rem 0 0.3rem;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 0.35s ease both;
+}
+
+@keyframes barPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
