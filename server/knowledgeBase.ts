@@ -142,65 +142,73 @@ export interface CompetitorBattlecard {
 export const COMPETITOR_BATTLECARDS: Record<string, CompetitorBattlecard> = {
   dell: {
     vendor: 'Dell Technologies',
-    flagshipProducts: ['PowerMax 2500 / 8500', 'PowerStore', 'PowerScale (Isilon)', 'PowerProtect'],
+    flagshipProducts: ['PowerMax 2500 / 8500', 'PowerStore', 'PowerScale (Isilon)', 'PowerProtect / Cyber Recovery', 'ECS / ObjectScale'],
     vulnerabilities: [
       'Post-warranty maintenance cliff: support/maintenance pricing tends to rise sharply in years 4–5, nudging customers toward expensive forklift refreshes.',
-      'Fragmented OS estate: PowerMax, PowerStore, and PowerScale each run different operating systems — no single control plane like IBM Storage Virtualize.',
-      'Ransomware detection is largely post-process/software (CloudIQ) rather than inline at the drive module like IBM FCM5.',
-      'PowerScale can bottleneck on single-stream throughput for large GPU training vs a true parallel file system.',
+      'Fragmented OS estate: PowerMax, PowerStore, PowerScale, and ECS each run completely different operating systems — no single unified control plane.',
+      'Ransomware detection is largely post-process software (CloudIQ) rather than inline drive hardware, and recovery orchestration is fragmented.',
+      'PowerScale can bottleneck on single-stream throughput for large GPU clusters vs parallel file systems.',
+      'ECS appliance lock-in limits open S3 scaling across commodity servers.',
     ],
     trapsToSet: [
-      'Ask: "When Dell quoted your refresh, were years 4, 5, and 6 of maintenance locked in writing — or are you exposed to the post-warranty increase?"',
-      'Ask: "How many minutes after an active encryption event does your current tooling notify SecOps — is detection inline at the drive, or delayed in analytics?"',
+      'Ask: "When Dell quoted your refresh, were years 4, 5, and 6 of maintenance locked in writing — or are you exposed to post-warranty escalation?"',
+      'Ask: "For cyber recovery, how long does clean-room validation take across multi-tier workloads before restoring to production?"',
+      'Ask: "How many disparate management consoles do you log into to manage Dell block, file, object, and backup silos?"',
     ],
     ibmCounterPosition:
-      'IBM FlashSystem 9600 with FCM5 gives sub-minute inline ransomware detection and ~60-second safeguarded-copy recovery, virtualizes existing Dell arrays to protect prior investment, and offers transparent flat-rate maintenance via FlashWatch.',
+      'IBM offers a cohesive multi-product portfolio: IBM Storage Defender for automated clean-room cyber resilience across the entire estate; IBM Storage Ceph for open, software-defined S3 telemetry and object lakes (displacing ECS); IBM Storage Scale for GPU/AI parallel streaming (displacing PowerScale); and IBM FlashSystem 9600 with FCM5 for mission-critical block with inline hardware ransomware detection.',
   },
   pure: {
     vendor: 'Pure Storage',
-    flagshipProducts: ['FlashArray //X (performance)', 'FlashArray //XL (flagship)', 'FlashArray //C & //E (capacity)', 'FlashBlade //S & //E', 'Evergreen//One'],
+    flagshipProducts: ['FlashArray //X & //XL', 'FlashArray //C & //E', 'FlashBlade //S & //E', 'Portworx', 'Evergreen//One'],
     vulnerabilities: [
-      'Evergreen//One subscription economics can exceed capex ownership over a multi-year horizon — worth modeling cumulative 5-year spend.',
-      'Compression/dedup runs on the controllers; heavy concurrent random writes can produce latency tail spikes.',
-      'FlashBlade can hit network/controller choke points feeding very large GPU training clusters vs GPUDirect parallel streaming.',
-      'No dedicated inline hardware ransomware detection on the flash module itself (relies on snapshot cadence + software).',
+      'Evergreen//One subscription economics can heavily exceed capex ownership over a multi-year horizon — cumulative 5-year spend is often significantly higher.',
+      'Compression and deduplication run on controllers; heavy concurrent writes can trigger latency tail spikes.',
+      'FlashBlade can hit controller choke points feeding large GPU training fleets vs true parallel file streaming.',
+      'No inline hardware ransomware detection on the flash module itself (relies on scheduled snapshots and software alerts).',
+      'Portworx adds complex separate licensing and management on top of Kubernetes.',
     ],
     trapsToSet: [
-      'Ask: "Have you modeled cumulative 5-year Evergreen//One spend against owning capacity with guaranteed data reduction?"',
-      'Ask: "At peak GPU data-loader bandwidth, have you seen NFS/S3 choke points on FlashBlade?"',
+      'Ask: "Have you modeled cumulative 5-year Evergreen//One subscription spend against owning capacity with guaranteed hardware data reduction?"',
+      'Ask: "At peak GPU training throughput, have you seen NFS/S3 controller choke points on FlashBlade?"',
+      'Ask: "For Kubernetes microservices, how many separate tooling layers do you maintain between Portworx and your underlying storage?"',
     ],
     ibmCounterPosition:
-      'IBM Storage Scale delivers parallel GPUDirect throughput for AI pipelines, while FlashSystem with FCM5 offloads compression/dedup to module hardware — protecting host IOPS — and adds inline cyber detection Pure lacks.',
+      'IBM Storage Fusion provides turnkey container-native data services, backup, and DR directly integrated with Red Hat OpenShift (displacing Portworx); IBM Storage Scale delivers GPUDirect parallel throughput for AI (displacing FlashBlade); IBM Storage Ceph provides exabyte-scale open object; and IBM FlashSystem with FCM5 offloads compression/dedup to drive silicon with guaranteed sub-minute inline ransomware detection.',
   },
   netapp: {
     vendor: 'NetApp',
-    flagshipProducts: ['AFF A-Series (A20 / A50 / A70 / A90 / A1K)', 'FAS Series', 'StorageGRID', 'FSx for NetApp ONTAP'],
+    flagshipProducts: ['AFF A-Series (A20–A1K)', 'FAS Series', 'StorageGRID', 'FSx for NetApp ONTAP', 'NetApp Astra / Trident'],
     vulnerabilities: [
-      'WAFL snapshot/metadata sprawl can degrade read performance on high-churn databases over time.',
-      'FSx for ONTAP in cloud can accrue meaningful egress and capacity charges as datasets grow.',
-      'Traditional dual-controller HA pairs can cap IOPS vs multi-node scale-out clustering.',
+      'WAFL snapshot metadata sprawl degrades latency on high-churn transactional databases over time.',
+      'Cloud data mobility (FSx for ONTAP) incurs steep egress and capacity fees as telemetry and AI data grow.',
+      'Dual-controller HA architecture caps IOPS ceiling vs modern scale-out clusters.',
+      'StorageGRID appliances have proprietary hardware ties compared to open software-defined object storage.',
     ],
     trapsToSet: [
       'Ask: "How does database latency behave during heavy snapshot rotation under ONTAP?"',
-      'Ask: "What are your projected FSx for ONTAP egress/capacity costs over the next 3 years as AI datasets expand?"',
+      'Ask: "What are your projected FSx for ONTAP egress and capacity costs over the next 3 years as analytics datasets expand?"',
+      'Ask: "What is your automated clean-room recovery plan if your primary NetApp arrays and snapshots are compromised?"',
     ],
     ibmCounterPosition:
-      'IBM FlashSystem with Safeguarded Copy avoids snapshot-driven latency degradation, and IBM Storage Scale provides true hybrid-cloud data mobility (AFM) without punitive egress.',
+      'IBM Storage Defender provides unified cyber resilience and audited clean-room recovery across heterogeneous arrays; IBM Storage Ceph delivers open S3 object storage at multi-petabyte scale without appliance markups (displacing StorageGRID); IBM Storage Fusion delivers container-native backup on OpenShift (displacing Astra); and IBM Storage Scale provides true hybrid-cloud global mobility (AFM) without cloud lock-in.',
   },
   hpe: {
     vendor: 'HPE',
-    flagshipProducts: ['Alletra Storage MP (B10000 / X10000)', 'Alletra 9000', 'GreenLake for Block Storage'],
+    flagshipProducts: ['Alletra Storage MP (B10000 / X10000)', 'Alletra 9000', 'GreenLake for Block Storage', 'Zerto'],
     vulnerabilities: [
-      'GreenLake consumption billing can be hard to forecast and may exceed owned-capacity TCO at steady-state.',
-      'Disaggregated Alletra MP is relatively newer in enterprise mission-critical track record vs IBM FlashSystem lineage.',
-      'Cyber-resilience depends on surrounding software stack rather than inline module-level detection.',
+      'GreenLake consumption billing can be unpredictable quarter-to-quarter and exceeds owned-capacity TCO at scale.',
+      'Disaggregated Alletra MP architecture is newer with a shorter enterprise mission-critical track record vs established platforms.',
+      'Ransomware detection depends on downstream software tools rather than inline module-level drive hardware.',
+      'Lacks native deep-tier exabyte object integration without third-party bolt-ons.',
     ],
     trapsToSet: [
-      'Ask: "How predictable has GreenLake billing actually been quarter to quarter against your original estimate?"',
-      'Ask: "Where does ransomware detection happen in your Alletra stack — inline at the drive, or in downstream software?"',
+      'Ask: "How predictable has GreenLake billing actually been against your original forecast?"',
+      'Ask: "Where does ransomware detection happen in your Alletra stack — inline at the hardware drive, or delayed in host software?"',
+      'Ask: "How do you coordinate disaster recovery between containerized apps and legacy SAN volumes?"',
     ],
     ibmCounterPosition:
-      'IBM FlashSystem offers a long mission-critical track record with inline FCM5 cyber detection and transparent maintenance, and can virtualize HPE arrays under one control plane during transition.',
+      'IBM FlashSystem offers proven reliability with inline FCM5 hardware cyber detection and transparent flat-rate maintenance via FlashWatch; IBM Storage Defender orchestrates enterprise-wide cyber recovery; IBM Storage Fusion unifies container data protection for OpenShift; and IBM Tape provides a true physical air-gapped compliance tier.',
   },
 };
 

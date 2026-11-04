@@ -114,6 +114,25 @@ BE SPECIFIC, NOT GENERIC (this is the difference between a useful dossier and Ch
 - Do not default to boilerplate like "they face data growth and cybersecurity challenges." Say what KIND of data, from which workload, under which regulation, at what scale for THIS company.
 - Well-known public firmographics (headquarters city, approximate annual revenue, approximate employee count) for large/public companies ARE established facts — state them with High confidence. Reserve "not reliably known" for things that genuinely change and that you are actually unsure of (like a current individual's name when you lack a source).
 
+INDUSTRY-AUTHENTIC WORKLOAD FIDELITY (CRITICAL):
+- Ground all findings and storage workloads strictly in the target company's ACTUAL industry:
+  * Electric / Gas / Water Utilities: SCADA/EMS systems, AMI/smart meter telemetry ingestion, GIS geospatial networks, grid sensor time-series data, NERC CIP compliance, substation edge data, operational DR and clean-room isolation. NEVER suggest medical imaging, hospital PACS, retail POS, or algorithmic trading for a utility!
+  * Healthcare / Life Sciences: PACS / VNA medical imaging, Epic / Cerner EHR, HIPAA/HITECH compliance, genomic sequencing, clinical AI inference.
+  * Financial Services: Core banking OLTP, payment settlement, fraud detection, algorithmic trading, SEC 17a-4 compliance, DORA compliance.
+  * Manufacturing / Logistics: MES, IoT sensor telematics, supply chain ERP, warehouse automation, computer vision QA.
+  * Technology / SaaS: Multi-tenant Kubernetes clusters, CI/CD telemetry, real-time analytics data pipelines, customer-facing microservices.
+- Never map an industry-inappropriate workload to the target company.
+
+BALANCED MULTI-PRODUCT RECOMMENDATIONS (DO NOT DEFAULT TO FLASHSYSTEM):
+- IBM Storage is a rich, multi-tiered portfolio. DO NOT recommend FlashSystem for every opportunity! You must match the right tool to the right problem:
+  * IBM Storage Defender: Highlight for enterprise cyber resilience, ransomware detection, clean-room recovery orchestration, and regulatory compliance (NERC CIP for utilities, DORA for finance, SEC for public companies).
+  * IBM Storage Ceph: Highlight for large-scale telemetry data lakes, smart meter logs, S3 object repositories, and multi-petabyte unstructured storage.
+  * IBM Storage Fusion: Highlight for containerized applications, Red Hat OpenShift data services, and Kubernetes persistent storage & disaster recovery.
+  * IBM Storage Scale: Highlight for high-throughput AI GPU clusters (GPUDirect), HPC simulation, genomics, and global parallel file data platforms.
+  * IBM Tape (Diamondback / TS4500): Highlight for air-gapped immutable compliance archive, lowest $/TB, and lowest carbon footprint.
+  * IBM FlashSystem (5600/7600/9600 & C200): Highlight for core primary transactional databases, OLTP, low-latency block consolidation, and capacity flash.
+- Ensure your recommendations across the dossier actively utilize this diverse portfolio rather than over-indexing on FlashSystem alone.
+
 ${sourcingRules}
 
 OUTPUT FORMAT:
@@ -191,14 +210,28 @@ export async function runResearchPipeline(
   // Each section is wrapped by safe() — a single failed section yields an empty default
   // rather than killing the whole report.
 
-  // Step 1a — Firmographic profile (own small call so it reliably fills in)
-  onProgress?.(step(1, 'Agent 1 · Profile', 'in_progress', `Establishing firmographic profile for ${companyName}...`));
-  const profile = await safe(
-    'profile',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `Give the firmographic profile of "${companyName}". Return JSON ONLY:
+  // Launch Agents 1-4 concurrently in a parallel research swarm
+  onProgress?.(step(1, 'Agent Swarm', 'in_progress', `Investigating ${companyName} across all intelligence dimensions in parallel...`));
+
+  const completedSteps = new Set<number>();
+  const reportProgress = (completedStep: number, label: string, detail: string) => {
+    completedSteps.add(completedStep);
+    let nextActive = 1;
+    while (nextActive <= 4 && completedSteps.has(nextActive)) {
+      nextActive++;
+    }
+    onProgress?.(step(Math.min(nextActive, 4), label, 'in_progress', detail));
+  };
+
+  // Agent 1: Profile & Strategy
+  const runAgent1 = async () => {
+    const [profile, companyStrategy] = await Promise.all([
+      safe(
+        'profile',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `Give the firmographic profile of "${companyName}". Return JSON ONLY:
 {
   "companyName": string (official legal name),
   "ticker": string | null (stock ticker if public, else null),
@@ -209,19 +242,16 @@ export async function runResearchPipeline(
   "leadership": string (name the CURRENT CIO/CTO/top infrastructure leader ONLY if you are confident or it appears in the sources below; otherwise exactly "See stakeholder map")
 }
 Do NOT answer "Unknown" or "Not reliably known" for headquarters, revenue, or employees of a well-known company — those are established facts.${searchBlock(ctx, ['firmographics', 'people'])}`,
-        { timeoutMs: 60000 }
+            { timeoutMs: 60000 }
+          ),
+        { companyName }
       ),
-    { companyName }
-  );
-
-  // Step 1b — Company strategy
-  onProgress?.(step(1, 'Agent 1 · Strategy', 'in_progress', `Analyzing strategic direction for ${companyName}...`));
-  const companyStrategy = await safe(
-    'companyStrategy',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `Analyze the strategy of "${companyName}". Return JSON ONLY:
+      safe(
+        'companyStrategy',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `Analyze the strategy of "${companyName}". Return JSON ONLY:
 {
   "summary": string (3-5 sentences, plain prose, specific to this company),
   "businessSegments": Finding[] (3-4),
@@ -230,20 +260,24 @@ Do NOT answer "Unknown" or "Not reliably known" for headquarters, revenue, or em
   "aiAndInfraStrategy": Finding[] (2-3)
 }
 Keep each "detail" to 2-3 sentences, each anchored to a specific ${companyName} detail. ${FINDING_SCHEMA}${searchBlock(ctx, ['strategy'])}`,
-        { timeoutMs: 90000 }
+            { timeoutMs: 90000 }
+          ),
+        emptyStrategy()
       ),
-    emptyStrategy()
-  );
-  const a1 = { profile: unwrap(profile, 'profile'), companyStrategy: unwrap(companyStrategy, 'companyStrategy') };
+    ]);
+    reportProgress(1, 'Agent 1 Complete', `Established firmographics and strategy for ${companyName}.`);
+    return { profile: unwrap(profile, 'profile'), companyStrategy: unwrap(companyStrategy, 'companyStrategy') };
+  };
 
-  // Step 2 — Technology Landscape, then Business Challenges (two bounded calls)
-  onProgress?.(step(2, 'Agent 2 · Technology & Challenges', 'in_progress', 'Mapping infrastructure footprint, incumbent vendors, and storage-relevant challenges...'));
-  const techLandscape = await safe(
-    'technologyLandscape',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", analyze the technology landscape. Return JSON:
+  // Agent 2: Technology Landscape & Business Challenges
+  const runAgent2 = async () => {
+    const [techLandscape, challenges] = await Promise.all([
+      safe(
+        'technologyLandscape',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", analyze the technology landscape. Return JSON:
 {
   "summary": string,
   "cloudFootprint": Finding[] (2-3),
@@ -254,16 +288,16 @@ Keep each "detail" to 2-3 sentences, each anchored to a specific ${companyName} 
 Keep each "detail" to 2 sentences. ${FINDING_SCHEMA}
 VendorFinding = { "vendor": string, "category": string, "productsLikelyInUse": string[], "estimatedStage": "Active / mid-cycle"|"Likely renewal window"|"Legacy / exposed"|"Expanding", "whyExposed": string, "displacementAngle": string, "confidence": "High"|"Medium"|"Low", "source": {"label":string,"verified":boolean} }
 Be concrete about likely incumbents (Dell, Pure, NetApp, HPE, hyperscalers) but mark confidence honestly — you are inferring.${searchBlock(ctx, ['tech'])}`,
-        { timeoutMs: 90000 }
+            { timeoutMs: 90000 }
+          ),
+        emptyTech()
       ),
-    emptyTech()
-  );
-  const challenges = await safe(
-    'businessChallenges',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", analyze storage-relevant business challenges. Return JSON:
+      safe(
+        'businessChallenges',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", analyze storage-relevant business challenges. Return JSON:
 {
   "summary": string,
   "dataGrowthCosts": Finding[] (2),
@@ -272,35 +306,42 @@ Be concrete about likely incumbents (Dell, Pure, NetApp, HPE, hyperscalers) but 
   "aiWorkloadDemands": Finding[] (2)
 }
 Keep each "detail" to 2 sentences. ${FINDING_SCHEMA}`,
-        { timeoutMs: 90000 }
+            { timeoutMs: 90000 }
+          ),
+        emptyChallenges()
       ),
-    emptyChallenges()
-  );
-  const a2 = { technologyLandscape: unwrap(techLandscape, 'technologyLandscape'), businessChallenges: unwrap(challenges, 'businessChallenges') };
+    ]);
+    reportProgress(2, 'Agent 2 Complete', 'Mapped infrastructure footprint and storage challenges.');
+    return {
+      technologyLandscape: unwrap(techLandscape, 'technologyLandscape'),
+      businessChallenges: unwrap(challenges, 'businessChallenges'),
+    };
+  };
 
-  // Step 3 — Buying Signals, then IBM Opportunity Mapping (two bounded calls)
-  onProgress?.(step(3, 'Agent 3 · Signals & IBM Mapping', 'in_progress', 'Detecting buying signals and mapping to the current IBM Storage portfolio...'));
-  const buyingSignals = await safe(
-    'buyingSignals',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", identify buying signals relevant to an enterprise storage refresh. Return JSON:
+  // Agent 3: Buying Signals & IBM Opportunity Mapping
+  const runAgent3 = async () => {
+    const [buyingSignals, ibmMapping] = await Promise.all([
+      safe(
+        'buyingSignals',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", identify buying signals relevant to an enterprise storage refresh. Return JSON:
 {
   "summary": string,
   "signals": SignalFinding[] (4-6)
 }
 SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal"|"M&A / investment"|"Data center / capex"|"Regulatory pressure"|"AI initiative", "headline": string, "detail": string (2 sentences), "urgency": "Act now (0-30 days)"|"Near-term (this quarter)"|"Strategic (6-12 months)", "salesAction": string, "confidence": "High"|"Medium"|"Low", "source": {"label":string,"verified":boolean,"url"?:string,"date"?:string} }${searchBlock(ctx, ['signals'])}`,
-        { timeoutMs: 90000 }
+            { timeoutMs: 90000 }
+          ),
+        { summary: '', signals: [] }
       ),
-    { summary: '', signals: [] }
-  );
-  const ibmMapping = await safe(
-    'ibmOpportunityMapping',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, Storage Scale, Defender, Ceph, Fusion, Tape). Return JSON:
+      safe(
+        'ibmOpportunityMapping',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", map opportunities to the CURRENT IBM Storage portfolio (FlashSystem 5600/7600/9600 with FCM5, FlashSystem.ai, C200, Storage Scale, Defender, Ceph, Fusion, Tape). Return JSON:
 {
   "summary": string,
   "productOpportunities": ProductMatch[] (3-5),
@@ -310,21 +351,39 @@ SignalFinding = { "id": string, "signalType": "Leadership change"|"Hiring signal
 }
 ProductMatch = { "productName": string (exact IBM product), "productFamily": string, "matchedNeed": string, "keyDifferentiator": string, "targetWorkload": string, "displacementTarget": string, "estimatedDealBand": "Land (<$500K)"|"Mid ($500K-$2M)"|"Strategic ($2M+)", "confidence": "High"|"Medium"|"Low" }
 BusinessCaseMetric = { "metric": string, "currentState": string, "withIbm": string, "impact": string }
-CompetitorTactic = { "competitor": string, "likelyInstalled": string, "painPoint": string, "trapQuestion": string, "ibmCounter": string }`,
-        { timeoutMs: 90000 }
-      ),
-    emptyIbm()
-  );
-  const a3 = { buyingSignals: unwrap(buyingSignals, 'buyingSignals'), ibmOpportunityMapping: unwrap(ibmMapping, 'ibmOpportunityMapping') };
+CompetitorTactic = { "competitor": string, "likelyInstalled": string, "painPoint": string, "trapQuestion": string, "ibmCounter": string }
 
-  // Step 4 — Meeting prep (discovery+objections, then architectures+cases) + stakeholders
-  onProgress?.(step(4, 'Agent 4 · Meeting Prep', 'in_progress', 'Generating discovery questions, solution architectures, and stakeholder map...'));
-  const meetingCore = await safe(
-    'discovery+objections',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", produce discovery questions and objection handling for an IBM Storage SE. Return JSON:
+STRICT REQUIREMENTS FOR PRODUCT MATCHING:
+1. Workload authenticity: Every targetWorkload MUST belong to THIS company's actual industry operations (e.g. for a utility: smart meter data, SCADA telemetry, outage management, grid analytics, NERC CIP compliance; NEVER suggest hospital PACS, medical imaging, or financial trading for a utility).
+2. Diverse portfolio balance: DO NOT default to FlashSystem for every opportunity! You MUST span at least 3 distinct IBM Storage product families. For example:
+   - IBM Storage Defender for automated cyber recovery & compliance
+   - IBM Storage Ceph for massive unstructured data / telemetry / S3 object lakes
+   - IBM Storage Fusion for containerized Red Hat OpenShift data services & microservices
+   - IBM Storage Scale for high-throughput AI GPU clusters & parallel files
+   - IBM Tape for air-gapped deep compliance archive
+   - IBM FlashSystem for core latency-sensitive databases / transactional block storage
+   At most TWO recommendations may be from FlashSystem.`,
+            { timeoutMs: 90000 }
+          ),
+        emptyIbm()
+      ),
+    ]);
+    reportProgress(3, 'Agent 3 Complete', 'Identified buying signals and matched IBM Storage portfolio.');
+    return {
+      buyingSignals: unwrap(buyingSignals, 'buyingSignals'),
+      ibmOpportunityMapping: unwrap(ibmMapping, 'ibmOpportunityMapping'),
+    };
+  };
+
+  // Agent 4: Discovery, Architectures & Stakeholders
+  const runAgent4 = async () => {
+    const [meetingCore, meetingExtra, stakeholders] = await Promise.all([
+      safe(
+        'discovery+objections',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", produce discovery questions and objection handling for an IBM Storage SE. Return JSON:
 {
   "summary": string,
   "discoveryQuestions": DiscoveryQuestion[] (exactly 5),
@@ -332,34 +391,33 @@ CompetitorTactic = { "competitor": string, "likelyInstalled": string, "painPoint
 }
 DiscoveryQuestion = { "number": number, "question": string, "intent": string, "listenFor": string[], "pivot": string, "targetRole": string }
 ObjectionHandling = { "objection": string, "fromRole": string, "whyTheySayIt": string, "response": string, "proofPoint": string }`,
-        { timeoutMs: 90000 }
+            { timeoutMs: 90000 }
+          ),
+        { summary: '', discoveryQuestions: [], objectionsAndCounters: [] }
       ),
-    { summary: '', discoveryQuestions: [], objectionsAndCounters: [] }
-  );
-  const meetingExtra = await safe(
-    'architectures+cases',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", produce solution architectures and proof points mapped to IBM Storage. Return JSON:
+      safe(
+        'architectures+cases',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", produce solution architectures and proof points mapped to IBM Storage. Return JSON:
 {
   "solutionArchitectures": SolutionArchitecture[] (3),
   "caseStudies": CaseStudy[] (2)
 }
 SolutionArchitecture = { "id": string, "title": string, "scenario": string, "tiers": [{"name": string, "items": string[]}] (3 tiers), "benefits": string[] }
 CaseStudy = { "customerDescriptor": string, "industry": string, "challenge": string, "solution": string, "results": string[], "verified": boolean }
-For CaseStudy: set verified=true with a real named customer ONLY if you are genuinely confident it is a real public IBM reference; otherwise use an anonymized descriptor (e.g. "A top-10 global bank") and verified=false.`,
-        { timeoutMs: 90000 }
+All 3 SolutionArchitectures MUST reflect this company's actual industry (e.g. for a utility: Smart Grid Telemetry Lake with Ceph, Substation & OT Clean-Room Resilience with Defender, and Core Grid Analytics with FlashSystem; NEVER generate medical imaging or banking trading architectures for a utility!). For CaseStudy: set verified=true with a real named customer ONLY if you are genuinely confident it is a real public IBM reference; otherwise use an anonymized descriptor (e.g. "A major regional electric utility") and verified=false.`,
+            { timeoutMs: 90000 }
+          ),
+        { solutionArchitectures: [], caseStudies: [] }
       ),
-    { solutionArchitectures: [], caseStudies: [] }
-  );
-  onProgress?.(step(4, 'Agent 4 · Stakeholders', 'in_progress', `Identifying the right people to contact at ${companyName}...`));
-  const stakeholders = await safe(
-    'stakeholders',
-    () =>
-      callRorkJson<any>(
-        sys,
-        `For "${companyName}", determine WHO an IBM Storage SE should actually engage — the specific right people, not a generic list. Return JSON ONLY:
+      safe(
+        'stakeholders',
+        () =>
+          callRorkJson<any>(
+            sys,
+            `For "${companyName}", determine WHO an IBM Storage SE should actually engage — the specific right people, not a generic list. Return JSON ONLY:
 {
   "engagementStrategy": string (3-4 sentences: who to lead with FIRST and why, the sequence to work the account, and who NOT to lead with. Be specific to THIS company's situation — e.g. if they are AI-heavy, the Head of AI/ML Platforms may matter more than a generic CIO.),
   "stakeholderMap": StakeholderPersona[] (4-5, chosen for THIS account's situation)
@@ -379,26 +437,36 @@ StakeholderPersona = {
   "source": { "label": string, "verified": boolean, "url"?: string } (only when a name comes from a source below; else omit)
 }
 Name real individuals when the sources below support it. Exactly one persona must have isPrimaryTarget=true.${searchBlock(ctx, ['people'])}`,
-        { timeoutMs: 90000 }
+            { timeoutMs: 90000 }
+          ),
+        { engagementStrategy: '', stakeholderMap: [] }
       ),
-    { engagementStrategy: '', stakeholderMap: [] }
-  );
-  const mCore = unwrap(meetingCore, 'meetingPreparation');
-  const mExtra = unwrap(meetingExtra, 'meetingPreparation');
-  const stk = unwrap(stakeholders, 'stakeholders');
-  const stakeholderMap = Array.isArray(stk) ? stk : stk?.stakeholderMap || [];
-  const engagementStrategy = (Array.isArray(stk) ? '' : stk?.engagementStrategy) || '';
-  const a4 = {
-    meetingPreparation: {
-      summary: mCore.summary || '',
-      discoveryQuestions: mCore.discoveryQuestions || [],
-      objectionsAndCounters: mCore.objectionsAndCounters || [],
-      solutionArchitectures: mExtra.solutionArchitectures || [],
-      caseStudies: mExtra.caseStudies || [],
-    },
-    stakeholderMap,
-    engagementStrategy,
+    ]);
+    reportProgress(4, 'Agent 4 Complete', 'Synthesized discovery questions, architectures, and stakeholder map.');
+    const mCore = unwrap(meetingCore, 'meetingPreparation');
+    const mExtra = unwrap(meetingExtra, 'meetingPreparation');
+    const stk = unwrap(stakeholders, 'stakeholders');
+    const stakeholderMap = Array.isArray(stk) ? stk : stk?.stakeholderMap || [];
+    const engagementStrategy = (Array.isArray(stk) ? '' : stk?.engagementStrategy) || '';
+    return {
+      meetingPreparation: {
+        summary: mCore.summary || '',
+        discoveryQuestions: mCore.discoveryQuestions || [],
+        objectionsAndCounters: mCore.objectionsAndCounters || [],
+        solutionArchitectures: mExtra.solutionArchitectures || [],
+        caseStudies: mExtra.caseStudies || [],
+      },
+      stakeholderMap,
+      engagementStrategy,
+    };
   };
+
+  const [a1, a2, a3, a4] = await Promise.all([
+    runAgent1(),
+    runAgent2(),
+    runAgent3(),
+    runAgent4(),
+  ]);
 
   // Agent 5 — Executive Briefing + scoring
   onProgress?.(step(5, 'Agent 5 · Executive Briefing', 'in_progress', 'Synthesizing the full executive briefing and scoring the opportunity...'));
@@ -421,18 +489,18 @@ Name real individuals when the sources below support it. Exactly one persona mus
   "opportunityStage": "High propensity / urgent refresh" | "Strategic expansion" | "Competitive takeout" | "Early / nurture",
   "executiveBriefingDoc": string
 }
-The executiveBriefingDoc MUST be a thorough, well-structured MARKDOWN document (this is the ONE field where markdown is required). Make it genuinely useful and LONG (aim for 700-1100 words). Structure with ## headings:
+The executiveBriefingDoc MUST be a thorough, well-structured MARKDOWN document (this is the ONE field where markdown is required). Aim for 450-650 words with crisp, punchy SE prose and bullet points under each ## heading:
 ## Executive Summary (the one-paragraph "why this account, why now")
-## Where IBM Storage Fits (3-5 specific plays mapped to their situation, naming exact products)
+## Where IBM Storage Fits (3-5 specific plays mapped to their situation across Defender, Ceph, Fusion, Scale, and FlashSystem)
 ## The Numbers That Matter (business-case framing)
 ## Competitive Landscape (who is likely incumbent and how to displace)
 ## Recommended Meeting Plan (how to run the first exec conversation)
 ## Key Risks & Unknowns (what to verify before the meeting — be honest about what is inferred)
-Write in crisp SE prose. Use real IBM product names. Do not fabricate specific metrics as if verified; frame estimates as estimates.
+Write in crisp SE prose. Ground all workloads strictly in this company's actual industry. Real IBM product names only. Frame estimates as estimates.
 
 RESEARCH CONTEXT:
 ${summaryContext}`,
-        { timeoutMs: 120000 }
+        { timeoutMs: 90000 }
       ),
     { opportunityScore: 50, opportunityStage: 'Early / nurture', executiveBriefingDoc: '' }
   );
