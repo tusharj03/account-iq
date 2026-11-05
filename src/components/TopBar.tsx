@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, Plus, MessageSquareText } from 'lucide-react';
-import { IbmLogo } from './Logo';
+import { AccountIqLogo } from './Logo';
 import { AccountIntelligenceReport, ResearchMode } from '../types';
 
 export function TopBar({
@@ -18,11 +18,11 @@ export function TopBar({
     <header className="sticky top-0 z-30 bg-white border-b border-gray-20">
       <div className="h-14 px-5 flex items-center gap-4 max-w-content mx-auto">
         <div className="flex items-center gap-3">
-          <IbmLogo height={20} />
+          <AccountIqLogo height={24} />
           <div className="h-5 w-px bg-gray-20" />
           <div>
-            <div className="text-[15px] font-semibold text-gray-100 leading-tight">Account Intelligence</div>
-            <div className="text-[11px] text-gray-50 leading-tight mt-0.5">Storage Solutions Engineering</div>
+            <div className="text-[15px] font-semibold text-gray-100 leading-tight">AccountIQ</div>
+            <div className="text-[11px] text-gray-50 leading-tight mt-0.5">Enterprise Storage Copilot</div>
           </div>
         </div>
 

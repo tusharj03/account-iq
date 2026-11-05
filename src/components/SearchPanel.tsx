@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 import { ResearchMode, AccountSummary } from '../types';
-import { IbmLogo } from './Logo';
+import { AccountIqLogo } from './Logo';
 
 const EXAMPLES = ['JPMorgan Chase', 'UnitedHealth Group', 'Walmart', 'Delta Air Lines', 'Pfizer'];
 
@@ -35,9 +35,9 @@ export function SearchPanel({
       )}
 
       <div className="max-w-2xl">
-        <div className="flex items-center gap-2 mb-5">
-          <IbmLogo height={18} />
-          <span className="text-xs font-mono uppercase tracking-widest text-gray-50">Account Intelligence</span>
+        <div className="flex items-center gap-2.5 mb-5">
+          <AccountIqLogo height={24} />
+          <span className="text-xs font-mono uppercase tracking-widest text-gray-50">AccountIQ · Storage Intelligence</span>
         </div>
         <h1 className="text-3xl font-semibold text-gray-100 leading-tight">
           Research any enterprise account in minutes, not hours.

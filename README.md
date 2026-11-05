@@ -80,6 +80,16 @@ npm run build
 
 ---
 
+## ⚖️ Legal Disclaimer & Trademark Notice
+
+AccountIQ is an independent analytical tool built for enterprise solutions engineers. It is **not** an official product of, nor is it sponsored, authorized, or endorsed by International Business Machines Corporation (IBM) or any other vendor mentioned herein.
+
+- **IBM**, **FlashSystem**, **DS8000**, **Storage Scale**, **Storage Defender**, **Storage Fusion**, **Storage Ceph**, **IBM Z**, **zSystems**, and other IBM trademarks are registered trademarks of International Business Machines Corporation in the United States and/or other countries.
+- **Dell**, **PowerMax**, **PowerStore**, **PowerScale**, **Pure Storage**, **FlashArray**, **FlashBlade**, **Portworx**, **NetApp**, **ONTAP**, **HPE**, and **Alletra** are trademarks of their respective owners.
+- All vendor and product references are used strictly for informational, educational, and nominative fair-use comparative purposes.
+
+---
+
 ## 🛡️ License
-Proprietary & Confidential - Built for Enterprise Solutions Engineering Teams.
+MIT License - Built for Enterprise Solutions Engineering Research.
 

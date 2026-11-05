@@ -80,9 +80,18 @@ export default function App() {
 
       <CopilotDrawer open={copilotOpen} account={account} onClose={() => setCopilotOpen(false)} />
 
-      <footer className="max-w-content mx-auto px-5 py-8 text-xs text-gray-40 border-t border-gray-20 mt-8">
-        AccountIQ · IBM Storage Account Intelligence · IBM® is a trademark of International Business Machines Corp.
-        Findings are {mode === 'web-verified' ? 'web-sourced where linked, otherwise AI analysis' : 'AI analysis — verify time-sensitive facts before customer meetings'}.
+      <footer className="max-w-content mx-auto px-5 py-8 text-xs text-gray-50 border-t border-gray-20 mt-8 space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="font-medium text-gray-70">
+            AccountIQ · Autonomous Enterprise Storage Intelligence Copilot
+          </div>
+          <div className="text-gray-50">
+            Findings are {mode === 'web-verified' ? 'web-sourced where linked, otherwise AI analysis' : 'AI analysis — verify time-sensitive facts before customer meetings'}.
+          </div>
+        </div>
+        <p className="text-[11px] text-gray-40 leading-relaxed">
+          Disclaimer: AccountIQ is an independent analytical tool for solutions engineers. It is not affiliated with, sponsored by, or endorsed by International Business Machines Corporation (IBM) or any other vendor. IBM, FlashSystem, DS8000, and other IBM product names are trademarks of IBM Corp. Dell, Pure Storage, NetApp, and HPE are trademarks of their respective owners, referenced strictly under nominative fair use for descriptive and comparative purposes.
+        </p>
       </footer>
     </div>
   );
